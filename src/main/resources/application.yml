@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: redis-time
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
