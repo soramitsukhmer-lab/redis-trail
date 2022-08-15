@@ -25,8 +25,6 @@ class ProductPortal(
     private val redisMessagePublisher: RedisMessagePublisher,
     private val redisMessageSubscriber: RedisMessageSubscriber
 ){
-    private val log = LoggerFactory.getLogger(this::class.java)
-
     @PostMapping
     fun save(@RequestBody product: Product) : Product{
         return productRepo.save(product)
@@ -34,13 +32,11 @@ class ProductPortal(
 
     @GetMapping
     fun findAll() : List<Product> {
-        redisMessagePublisher.publish("Received Request From Client: Endpoint(/api/v1/people, GET)")
         return productRepo.findAll()
     }
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: Int) : Product? {
-        log.info("All Messages: ${redisMessageSubscriber.messageList}")
         return productRepo.findById(id)
     }
 
