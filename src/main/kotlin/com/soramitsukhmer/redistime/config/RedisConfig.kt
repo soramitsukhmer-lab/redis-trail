@@ -1,10 +1,16 @@
 package com.soramitsukhmer.redistime.config
 
+import com.soramitsukhmer.redistime.redis.RedisMessagePublisher
+import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
+import com.soramitsukhmer.redistime.redis.`interface`.MessagePublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.RedisMessageListenerContainer
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -32,6 +38,29 @@ class RedisConfig {
         template.setEnableTransactionSupport(true)
         template.afterPropertiesSet()
         return template
+    }
+
+    @Bean
+    fun topic() : ChannelTopic {
+        return ChannelTopic("messageQueue")
+    }
+
+    @Bean
+    fun messageListener() : MessageListenerAdapter {
+        return MessageListenerAdapter(RedisMessageSubscriber())
+    }
+
+    @Bean
+    fun redisContainer() : RedisMessageListenerContainer {
+        val container = RedisMessageListenerContainer()
+        container.setConnectionFactory(connectionFactory())
+        container.addMessageListener(messageListener(), topic())
+        return container
+    }
+
+    @Bean
+    fun redisPublisher() : MessagePublisher {
+        return RedisMessagePublisher(redisTemplate(), topic())
     }
 
 }
