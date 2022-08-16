@@ -1,10 +1,10 @@
 package com.soramitsukhmer.redistime.portal
 
-import com.soramitsukhmer.redistime.models.Product
+import com.soramitsukhmer.redistime.models.Record
+
 import com.soramitsukhmer.redistime.redis.RedisMessagePublisher
 import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
-import com.soramitsukhmer.redistime.repository.ProductRepository
-import org.slf4j.LoggerFactory
+import com.soramitsukhmer.redistime.repository.RecordRepository
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,28 +20,30 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/products")
-class ProductPortal(
-    private val productRepo: ProductRepository,
+class RecordPortal(
+    private val productRepo: RecordRepository,
     private val redisMessagePublisher: RedisMessagePublisher,
     private val redisMessageSubscriber: RedisMessageSubscriber
 ){
     @PostMapping
-    fun save(@RequestBody product: Product) : Product{
-        return productRepo.save(product)
+    fun save(@RequestBody record: Record) : Record {
+//        println(record.data.isEmpty())
+//        return record
+        return productRepo.save(record)
     }
 
-    @GetMapping
-    fun findAll() : List<Product> {
-        return productRepo.findAll()
+    @GetMapping("/{subject}")
+    fun findAll(@PathVariable subject: String) : List<Record> {
+        return productRepo.findAll(subject)
     }
 
-    @GetMapping("/{id}")
-    fun findById(@PathVariable id: Int) : Product? {
-        return productRepo.findById(id)
+    @GetMapping("/{subject}/{id}")
+    fun findById(@PathVariable subject: String , @PathVariable id: Int) : Record? {
+        return productRepo.findById(subject,  id)
     }
 
-    @DeleteMapping("/{id}")
-    fun deleteById(@PathVariable id: Int) : Boolean {
-        return productRepo.deleteById(id)
+    @DeleteMapping("/{subject}/{id}")
+    fun deleteById(@PathVariable subject: String ,@PathVariable id: Int) : Boolean {
+        return productRepo.deleteById(subject , id)
     }
 }
