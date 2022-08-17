@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/v1/records")
 class RecordPortal(
     private val productRepo: RecordRepository,
     private val redisMessagePublisher: RedisMessagePublisher,

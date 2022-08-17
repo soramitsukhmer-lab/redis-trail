@@ -10,9 +10,8 @@ class RecordRepository(
     private val template: RedisTemplate<Any, Any>
 ){
     fun save(record: Record) : Record {
-
         record.createdAt  = System.currentTimeMillis();
-        template.opsForHash<Any, Any>().put(record.subject, record.subjectId, record)
+        template.opsForHash<Any, Any>().put(record.subject, record.subjectId.toString(), record)
         return record
     }
 
@@ -21,11 +20,11 @@ class RecordRepository(
     }
 
     fun findById(subject: String , id: Int) : Record? {
-        return template.opsForHash<String, Record>().get(subject, id)
+        return template.opsForHash<String, Record>().get(subject, id.toString())
     }
 
     fun deleteById(subject: String, id: Int) : Boolean {
-        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id) }.fold(
+        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id.toString()) }.fold(
             onFailure = { false },
             onSuccess = { true }
         )
