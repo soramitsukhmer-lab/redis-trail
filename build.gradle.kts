@@ -30,6 +30,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	implementation("redis.clients:jedis")
+	implementation("io.lettuce:lettuce-core")
+	implementation("org.apache.commons:commons-pool2")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
