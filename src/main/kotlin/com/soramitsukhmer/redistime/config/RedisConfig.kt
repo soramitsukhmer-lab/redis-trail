@@ -2,7 +2,7 @@ package com.soramitsukhmer.redistime.config
 
 import com.soramitsukhmer.redistime.redis.RedisMessagePublisher
 import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
-import com.soramitsukhmer.redistime.redis.`interface`.MessagePublisher
+import com.soramitsukhmer.redistime.redis.`interface`.ITemplatePublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -59,7 +59,7 @@ class RedisConfig {
     }
 
     @Bean
-    fun redisPublisher() : MessagePublisher {
+    fun redisPublisher() : ITemplatePublisher {
         return RedisMessagePublisher(redisTemplate(), topic())
     }
 

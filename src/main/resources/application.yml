@@ -8,3 +8,8 @@ spring:
 server:
   error:
     include-message: always
+
+application:
+  stream-config:
+    stream-key: "TEST_STREAM"
+    group: "TEST_GROUP"
