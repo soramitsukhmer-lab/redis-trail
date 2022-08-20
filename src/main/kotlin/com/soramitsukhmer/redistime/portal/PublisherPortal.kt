@@ -1,6 +1,6 @@
 package com.soramitsukhmer.redistime.portal
 
-import com.soramitsukhmer.redistime.models.Record
+import com.soramitsukhmer.redistime.models.RecordEvent
 import com.soramitsukhmer.redistime.redis.`interface`.IStreamPublisher
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +14,7 @@ class PublisherPortal(
 ) {
 
     @PostMapping("/stream")
-    fun publishStream(@RequestBody record: Record) : Record {
+    fun publishStream(@RequestBody record: RecordEvent) : RecordEvent {
         streamPublisher.publish(record)
         return record
     }

@@ -1,6 +1,6 @@
 package com.soramitsukhmer.redistime.redis
 
-import com.soramitsukhmer.redistime.config.ApplicationProperties
+import com.soramitsukhmer.redistime.models.common.StreamEvent
 import com.soramitsukhmer.redistime.redis.`interface`.IStreamPublisher
 import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.data.redis.connection.stream.StreamRecords
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service
 
 @Service
 class StreamPublisher(
-    private val template: ReactiveRedisTemplate<String, Any>,
-    private val applicationProperties: ApplicationProperties
+    private val template: ReactiveRedisTemplate<String, Any>
 ): IStreamPublisher {
 
-    override fun publish(message: Any) {
-        val record: ObjectRecord<String, Any> = StreamRecords.newRecord()
+    override fun publish(message: StreamEvent) {
+        val record: ObjectRecord<String, StreamEvent> = StreamRecords.newRecord()
             .ofObject(message)
-            .withStreamKey(applicationProperties.streamConfig.streamKey)
+            .withStreamKey(message.streamKey())
+
         template.opsForStream<String, Any>()
             .add(record)
             .subscribe()
