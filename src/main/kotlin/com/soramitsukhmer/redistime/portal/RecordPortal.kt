@@ -4,6 +4,7 @@ import com.soramitsukhmer.redistime.models.RecordEvent
 import com.soramitsukhmer.redistime.redis.RedisMessagePublisher
 import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
 import com.soramitsukhmer.redistime.repository.RecordRepository
+import org.springframework.data.domain.Range
 import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.web.bind.annotation.*
 
@@ -40,4 +41,17 @@ class RecordPortal(
 //    fun deleteById(@PathVariable subject: String ,@PathVariable id: Int) : Boolean {
 //        return productRepo.deleteById(subject , id)
 //    }
+
+    @GetMapping("/range/{subject}/{id}")
+    fun findRangeRecord(
+        @PathVariable subject: String ,
+        @PathVariable id: Int ,
+        @RequestParam("from") from: String?,
+        @RequestParam("to") to: String?,
+    ) : List<ObjectRecord<String, RecordEvent>>? {
+        return productRepo.getRangeRecords(
+            subject + "_" + id.toString(),
+            Range.closed(from ?: "-", to ?: "+")
+        )
+    }
 }
