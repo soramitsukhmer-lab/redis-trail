@@ -1,5 +1,7 @@
 package com.soramitsukhmer.redistime.repository.helper
 
+import org.springframework.data.domain.Range
+import org.springframework.data.redis.connection.RedisZSetCommands.Limit
 import org.springframework.data.redis.connection.stream.*
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -35,6 +37,15 @@ class RepositoryHelper<T>(
                 clazzType,
                 streamReadOptions,
                 StreamOffset.create(streamKey, ReadOffset.from(readOffset.toString()))
+            )
+    }
+
+    fun fetchRangeRecords(targetType: Class<T>, streamKey: String, range: Range<String>) : List<ObjectRecord<String, T>>? {
+        return template.opsForStream<String, T>()
+            .range(
+                targetType,
+                streamKey,
+                range
             )
     }
 }
