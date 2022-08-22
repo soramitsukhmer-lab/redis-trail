@@ -1,8 +1,6 @@
 package com.soramitsukhmer.redistime.config
 
-import com.soramitsukhmer.redistime.redis.RedisMessagePublisher
 import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
-import com.soramitsukhmer.redistime.redis.`interface`.ITemplatePublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -28,13 +26,14 @@ class RedisConfig {
     }
 
     @Bean
-    fun redisTemplate(): RedisTemplate<Any, Any> {
-        val template = RedisTemplate<Any, Any>()
+    fun redisTemplate(): RedisTemplate<String, Any> {
+        val template = RedisTemplate<String, Any>()
         template.setConnectionFactory(connectionFactory())
         template.keySerializer = StringRedisSerializer()
-        template.hashKeySerializer = StringRedisSerializer()
+//        template.hashKeySerializer = StringRedisSerializer()
         template.hashKeySerializer = JdkSerializationRedisSerializer()
-        template.valueSerializer = JdkSerializationRedisSerializer()
+//        template.valueSerializer = JdkSerializationRedisSerializer()
+        template.hashValueSerializer = JdkSerializationRedisSerializer()
         template.setEnableTransactionSupport(true)
         template.afterPropertiesSet()
         return template
@@ -58,9 +57,9 @@ class RedisConfig {
         return container
     }
 
-    @Bean
-    fun redisPublisher() : ITemplatePublisher {
-        return RedisMessagePublisher(redisTemplate(), topic())
-    }
+//    @Bean
+//    fun redisPublisher() : ITemplatePublisher {
+//        return RedisMessagePublisher(redisTemplate(), topic(), subscribeManagement)
+//    }
 
 }

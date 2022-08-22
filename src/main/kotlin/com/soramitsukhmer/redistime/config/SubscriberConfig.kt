@@ -7,8 +7,8 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 
 @Configuration
-class StreamSubscriberConfig(
-    private val redisTemplate: RedisTemplate<Any, Any>,
+class SubscriberConfig(
+    private val redisTemplate: RedisTemplate<String, Any>,
     private val connectionFactory : JedisConnectionFactory
 ) {
 

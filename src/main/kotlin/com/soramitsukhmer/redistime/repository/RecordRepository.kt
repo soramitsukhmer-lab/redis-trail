@@ -1,33 +1,37 @@
 package com.soramitsukhmer.redistime.repository
 
-import com.soramitsukhmer.redistime.models.Record
-import com.soramitsukhmer.redistime.models.Product
-import org.springframework.data.redis.core.RedisTemplate
+import com.soramitsukhmer.redistime.models.RecordEvent
+import com.soramitsukhmer.redistime.repository.helper.RepositoryHelper
+import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.stereotype.Repository
 
 @Repository
 class RecordRepository(
-    private val template: RedisTemplate<Any, Any>
-){
-    fun save(record: Record) : Record {
-        record.createdAt  = System.currentTimeMillis();
-        template.opsForHash<Any, Any>().put(record.subject, record.subjectId.toString(), record)
-        return record
+    private val helper: RepositoryHelper<RecordEvent>
+) {
+
+    fun save(message: RecordEvent) : RecordEvent {
+        message.createdAt  = System.currentTimeMillis()
+        return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message)
     }
 
-    fun findAll(subject: String) : List<Record> {
-        return template.opsForHash<String, Record>().values(subject)
+//    fun findAll(subject: String) : List<RecordEvent> {
+//        return template.opsForHash<String, RecordEvent>().values(subject)
+//    }
+//
+    fun getAllBySubjectAndId(subject: String, id: Int) : List<ObjectRecord<String, RecordEvent>>? {
+        val records = helper.fetchRecords(subject+"_"+id.toString(), RecordEvent::class.java)
+//        val recordEvents = records?.map {
+//            it.value
+//        }
+        return records
     }
-
-    fun findById(subject: String , id: Int) : Record? {
-        return template.opsForHash<String, Record>().get(subject, id.toString())
-    }
-
-    fun deleteById(subject: String, id: Int) : Boolean {
-        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id.toString()) }.fold(
-            onFailure = { false },
-            onSuccess = { true }
-        )
-    }
+//
+//    fun deleteById(subject: String, id: Int) : Boolean {
+//        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id.toString()) }.fold(
+//            onFailure = { false },
+//            onSuccess = { true }
+//        )
+//    }
 
 }

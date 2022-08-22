@@ -23,7 +23,7 @@ class RedisMessageSubscriber: MessageListener {
         messageList.add(message.toString())
         val body = String(message.body, StandardCharsets.UTF_8)
         val record = mapper.readValue(body,Record::class.java)
-        log.info("Message Received: $record")
+        log.info("Reddis Message Received: $record")
     }
 
 }
