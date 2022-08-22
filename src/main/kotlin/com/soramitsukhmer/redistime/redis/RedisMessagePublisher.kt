@@ -1,7 +1,9 @@
 package com.soramitsukhmer.redistime.redis
 
+import com.soramitsukhmer.redistime.models.common.StreamEvent
 import com.soramitsukhmer.redistime.redis.`interface`.ITemplatePublisher
 import org.springframework.data.redis.connection.stream.ObjectRecord
+import org.springframework.data.redis.connection.stream.RecordId
 import org.springframework.data.redis.connection.stream.StreamRecords
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
@@ -9,8 +11,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class RedisMessagePublisher(
-    private val template: RedisTemplate<Any, Any>,
-    private val chTopic: ChannelTopic
+    private val template: RedisTemplate<String, Any>,
+    private val chTopic: ChannelTopic,
+    private val subscribeManagement: SubscribeManagement
 ): ITemplatePublisher {
 
     /** NOTE:
@@ -22,11 +25,13 @@ class RedisMessagePublisher(
         template.convertAndSend(chTopic.topic, message)
     }
 
-    override fun publishStream(streamKey: String, message: Any) {
-        val record: ObjectRecord<Any, Any> = StreamRecords.newRecord()
+    override fun publishStream(message: StreamEvent) {
+        subscribeManagement.createGroup(message.streamKey(), message.groupName())
+        val record: ObjectRecord<String, StreamEvent> = StreamRecords.newRecord()
+            .`in`(message.streamKey())
             .ofObject(message)
-            .withStreamKey(streamKey)
-        template.opsForStream<Any, Any>().add(record)
+            .withId(RecordId.autoGenerate())
+        template.opsForStream<String, Any>().add(record)
     }
 
 }
