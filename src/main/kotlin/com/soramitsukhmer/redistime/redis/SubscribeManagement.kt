@@ -63,8 +63,4 @@ class SubscribeManagement(
             logger.warn("Group already exists $groupName")
         }
     }
-
-    fun existOrCreateGroup(streamKey: String, groupName: String) {
-        redisTemplate.opsForStream<Any, Any>().groups(streamKey).forEach { it.groupName() }
-    }
 }
