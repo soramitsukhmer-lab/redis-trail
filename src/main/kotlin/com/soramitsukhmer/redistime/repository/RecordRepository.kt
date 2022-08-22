@@ -16,8 +16,8 @@ class RecordRepository(
         return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message.createdAt.toString(), message)
     }
 
-    fun findAll(subject: String) : List<ObjectRecord<String, RecordEvent>>? {
-        return helper.fetchRecords(subject, RecordEvent::class.java)
+    fun getMetaRecords(metaStreamKey: String) : List<ObjectRecord<String, RecordEvent>>? {
+        return helper.fetchRecords(metaStreamKey, RecordEvent::class.java)
     }
 
     fun getAllBySubjectAndId(subject: String, id: Int) : List<ObjectRecord<String, RecordEvent>>? {
@@ -32,7 +32,9 @@ class RecordRepository(
         return helper.deleteEventFromMetaRecord(streamKey, time, event)
     }
 
-    fun getRangeRecords(streamKey: String, range: Range<String>) : List<ObjectRecord<String, RecordEvent>>? {
+    fun getRangeRecords(subject: String, id: Int, from: String?, to: String?) : List<ObjectRecord<String, RecordEvent>>? {
+        val streamKey = subject + "_" + id.toString()
+        val range = Range.closed(from ?: "-", to ?: "+")
         return helper.fetchRangeRecords(
             RecordEvent::class.java,
             streamKey,
