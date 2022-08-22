@@ -4,22 +4,33 @@ import org.springframework.data.redis.connection.stream.*
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
-import java.awt.print.Book
-
-import org.springframework.util.CollectionUtils
 
 
 @Service
 class RepositoryHelper<T>(
     private val template: RedisTemplate<String, Any>
 ){
-    fun generateAndSaveRecord(streamKey: String, event: T): T {
-        val record = StreamRecords.newRecord()
-            .`in`(streamKey)
-            .ofObject(event)
-            .withId(RecordId.autoGenerate())
+    fun generateAndSaveRecord(streamKey: String, time: String, event: T): T {
+        val record = generateRecord(streamKey, time, event)
         template.opsForStream<String, Any>().add(record)
         return event
+    }
+
+    fun generateRecord(streamKey: String, time: String, event: T): ObjectRecord<String, T> {
+        return StreamRecords.newRecord()
+            .`in`(streamKey)
+            .ofObject(event)
+            .withId(RecordId.of("$time-0"))
+    }
+
+    fun deleteEventFromMetaRecord(streamKey: String, time: String, event: T): Boolean {
+        val record = generateRecord(streamKey, time, event)
+        return kotlin.runCatching {
+            template.opsForStream<String, Any>().delete(record)
+        }.fold(
+            onFailure = { false },
+            onSuccess = { true }
+        )
     }
 
     fun fetchRecords(streamKey: String, clazzType: Class<T>): List<ObjectRecord<String, T>>? {

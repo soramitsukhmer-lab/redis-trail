@@ -44,7 +44,7 @@ class SubscribeManagement(
                 .build()
         val listenerContainer = StreamMessageListenerContainer
             .create(connectionFactory, options)
-        val subscription: Subscription = listenerContainer.receive(
+        val subscription: Subscription = listenerContainer.receiveAutoAck(
             Consumer.from(
                 groupName, InetAddress.getLocalHost().hostName
             ),

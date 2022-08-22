@@ -10,15 +10,15 @@ class RecordRepository(
     private val helper: RepositoryHelper<RecordEvent>
 ) {
 
-    fun save(message: RecordEvent) : RecordEvent {
-        message.createdAt  = System.currentTimeMillis()
-        return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message)
+    fun save(message: RecordEvent, metaStreamKey: String) : RecordEvent {
+        message.createdAt  = System.currentTimeMillis()         // should removed to keep createdAt time from client and redis consistent
+        return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message.createdAt.toString(), message)
     }
 
-//    fun findAll(subject: String) : List<RecordEvent> {
-//        return template.opsForHash<String, RecordEvent>().values(subject)
-//    }
-//
+    fun findAll(subject: String) : List<ObjectRecord<String, RecordEvent>>? {
+        return helper.fetchRecords(subject, RecordEvent::class.java)
+    }
+
     fun getAllBySubjectAndId(subject: String, id: Int) : List<ObjectRecord<String, RecordEvent>>? {
         val records = helper.fetchRecords(subject+"_"+id.toString(), RecordEvent::class.java)
 //        val recordEvents = records?.map {
@@ -26,12 +26,9 @@ class RecordRepository(
 //        }
         return records
     }
-//
-//    fun deleteById(subject: String, id: Int) : Boolean {
-//        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id.toString()) }.fold(
-//            onFailure = { false },
-//            onSuccess = { true }
-//        )
-//    }
+
+    fun deleteMetaRecord(streamKey: String, time: String, event: RecordEvent) : Boolean {
+        return helper.deleteEventFromMetaRecord(streamKey, time, event)
+    }
 
 }

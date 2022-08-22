@@ -30,7 +30,7 @@ class RedisMessagePublisher(
         val record: ObjectRecord<String, StreamEvent> = StreamRecords.newRecord()
             .`in`(message.streamKey())
             .ofObject(message)
-            .withId(RecordId.autoGenerate())
+            .withId(RecordId.of(message.publishTimestamp+"-0"))
         template.opsForStream<String, Any>().add(record)
     }
 

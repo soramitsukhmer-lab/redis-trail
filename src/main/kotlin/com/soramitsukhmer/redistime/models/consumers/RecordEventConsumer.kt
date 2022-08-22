@@ -29,10 +29,8 @@ class RecordEventConsumer(
                 /***
                  * This will generate another stream based on product and id
                  */
-                recordRepository.save(it)
-                /***
-                 * Shall we acknowledge after done saving and delete it from meta stream RECORD_EVENT
-                 */
+                recordRepository.save(it, RecordEvent.RECORD_EVENT.streamKey)
+                recordRepository.deleteMetaRecord(RecordEvent.RECORD_EVENT.streamKey, it.publishTimestamp, it)
             }
         )
     }

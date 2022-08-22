@@ -10,6 +10,7 @@ data class RecordEvent(
     val action: String,
     val createdBy: Long,
     var createdAt: Long,
+    override val publishTimestamp: String = System.currentTimeMillis().toString()
 ): StreamEvent {
 
     override fun streamKey(): String = "RECORD_EVENT"
