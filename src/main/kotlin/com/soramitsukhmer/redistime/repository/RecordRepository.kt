@@ -2,6 +2,7 @@ package com.soramitsukhmer.redistime.repository
 
 import com.soramitsukhmer.redistime.models.RecordEvent
 import com.soramitsukhmer.redistime.repository.helper.RepositoryHelper
+import org.springframework.data.domain.Range
 import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.stereotype.Repository
 
@@ -31,4 +32,11 @@ class RecordRepository(
         return helper.deleteEventFromMetaRecord(streamKey, time, event)
     }
 
+    fun getRangeRecords(streamKey: String, range: Range<String>) : List<ObjectRecord<String, RecordEvent>>? {
+        return helper.fetchRangeRecords(
+            RecordEvent::class.java,
+            streamKey,
+            range
+        )
+    }
 }
