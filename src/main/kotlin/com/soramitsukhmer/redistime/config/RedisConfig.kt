@@ -57,9 +57,4 @@ class RedisConfig {
         return container
     }
 
-//    @Bean
-//    fun redisPublisher() : ITemplatePublisher {
-//        return RedisMessagePublisher(redisTemplate(), topic(), subscribeManagement)
-//    }
-
 }
