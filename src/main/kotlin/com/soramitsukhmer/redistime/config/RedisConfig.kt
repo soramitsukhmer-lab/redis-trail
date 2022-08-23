@@ -1,6 +1,6 @@
 package com.soramitsukhmer.redistime.config
 
-import com.soramitsukhmer.redistime.redis.RedisMessageSubscriber
+import com.soramitsukhmer.redistime.redis.HashSubscriber
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -46,7 +46,7 @@ class RedisConfig {
 
     @Bean
     fun messageListener() : MessageListenerAdapter {
-        return MessageListenerAdapter(RedisMessageSubscriber())
+        return MessageListenerAdapter(HashSubscriber())
     }
 
     @Bean

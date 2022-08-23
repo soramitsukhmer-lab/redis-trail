@@ -1,7 +1,9 @@
 package com.soramitsukhmer.redistime.redis
 
+import com.soramitsukhmer.redistime.models.RecordEvent
 import com.soramitsukhmer.redistime.models.common.StreamEvent
 import com.soramitsukhmer.redistime.redis.`interface`.ITemplatePublisher
+import com.soramitsukhmer.redistime.repository.RecordRepository
 import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.data.redis.connection.stream.RecordId
 import org.springframework.data.redis.connection.stream.StreamRecords
@@ -13,7 +15,8 @@ import org.springframework.stereotype.Service
 class RedisMessagePublisher(
     private val template: RedisTemplate<String, Any>,
     private val chTopic: ChannelTopic,
-    private val subscribeManagement: SubscribeManagement
+    private val subscribeManagement: SubscribeManagement,
+    private val recordRepository: RecordRepository
 ): ITemplatePublisher {
 
     /** NOTE:
@@ -26,12 +29,28 @@ class RedisMessagePublisher(
     }
 
     override fun publishStream(message: StreamEvent) {
-        subscribeManagement.createGroup(message.streamKey(), message.groupName())
+        subscribeIfNotExistConsumer(message.streamKey(), message.groupName())
         val record: ObjectRecord<String, StreamEvent> = StreamRecords.newRecord()
             .`in`(message.streamKey())
             .ofObject(message)
             .withId(RecordId.of(message.publishTimestamp+"-0"))
         template.opsForStream<String, Any>().add(record)
+    }
+
+    private fun subscribeIfNotExistConsumer(streamKey: String, groupName: String) {
+        val emptyGroup = try {
+            template.opsForStream<String, Any>().consumers(streamKey, groupName).isEmpty
+        } catch (e: Exception) {
+            true
+        }
+        if (emptyGroup) {
+            subscribeManagement.startSubscribe(
+                groupName,
+                RecordEvent.RECORD_EVENT
+            ) {
+                recordRepository.saveAndDeleteMetaRecord(it, streamKey, it.publishTimestamp)
+            }
+        }
     }
 
 }

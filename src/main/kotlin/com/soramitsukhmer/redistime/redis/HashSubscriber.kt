@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
 
 @Service
-class RedisMessageSubscriber: MessageListener {
+class HashSubscriber: MessageListener {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val mapper = jacksonObjectMapper()
 
@@ -22,7 +22,7 @@ class RedisMessageSubscriber: MessageListener {
     override fun onMessage(message: Message, pattern: ByteArray?) {
         messageList.add(message.toString())
         val body = String(message.body, StandardCharsets.UTF_8)
-        val record = mapper.readValue(body,Record::class.java)
+        val record = mapper.readValue(body, Record::class.java)
         log.info("Reddis Message Received: $record")
     }
 

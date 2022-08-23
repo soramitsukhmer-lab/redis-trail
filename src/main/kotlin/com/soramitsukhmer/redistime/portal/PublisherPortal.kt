@@ -14,7 +14,7 @@ class PublisherPortal(
 ) {
 
     @PostMapping("/stream")
-    fun publishHash(@RequestBody record: RecordEvent) : RecordEvent {
+    fun publishStream(@RequestBody record: RecordEvent) : RecordEvent {
         templatePublisher.publishStream(record)
         return record
     }

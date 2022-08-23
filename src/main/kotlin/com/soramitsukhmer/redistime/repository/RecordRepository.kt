@@ -11,9 +11,11 @@ class RecordRepository(
     private val helper: RepositoryHelper<RecordEvent>
 ) {
 
-    fun save(message: RecordEvent, metaStreamKey: String) : RecordEvent {
+    fun saveAndDeleteMetaRecord(message: RecordEvent, metaStreamKey: String, time: String) : RecordEvent {
         message.createdAt  = System.currentTimeMillis()         // should removed to keep createdAt time from client and redis consistent
-        return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message.createdAt.toString(), message)
+        helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message.createdAt.toString(), message)
+        helper.deleteEventFromMetaRecord(metaStreamKey, time, message)
+        return message
     }
 
     fun getMetaRecords(metaStreamKey: String) : List<ObjectRecord<String, RecordEvent>>? {
@@ -26,10 +28,6 @@ class RecordRepository(
 //            it.value
 //        }
         return records
-    }
-
-    fun deleteMetaRecord(streamKey: String, time: String, event: RecordEvent) : Boolean {
-        return helper.deleteEventFromMetaRecord(streamKey, time, event)
     }
 
     fun getRangeRecords(subject: String, id: Int, from: String?, to: String?) : List<ObjectRecord<String, RecordEvent>>? {
