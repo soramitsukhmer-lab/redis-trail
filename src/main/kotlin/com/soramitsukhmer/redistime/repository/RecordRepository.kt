@@ -11,31 +11,30 @@ class RecordRepository(
     private val helper: RepositoryHelper<RecordEvent>
 ) {
 
-    fun save(message: RecordEvent) : RecordEvent {
-        message.createdAt  = System.currentTimeMillis()
-        return helper.generateAndSaveRecord(message.subject+"_"+message.subjectId.toString(), message)
+    fun saveAndDeleteMetaRecord(message: RecordEvent, metaStreamKey: String, time: String) : RecordEvent {
+        message.createdAt  = System.currentTimeMillis()         // TODO() should removed to keep createdAt time from client and redis consistent
+        val streamKey = message.subject.uppercase() + "_" + message.subjectId.toString()
+        helper.generateAndSaveRecord(streamKey, message.createdAt.toString(), message)
+        helper.deleteEventFromMetaRecord(metaStreamKey, time, message)
+        return message
     }
 
-//    fun findAll(subject: String) : List<RecordEvent> {
-//        return template.opsForHash<String, RecordEvent>().values(subject)
-//    }
-//
+    fun getMetaRecords(metaStreamKey: String) : List<ObjectRecord<String, RecordEvent>>? {
+        return helper.fetchRecords(metaStreamKey.uppercase(), RecordEvent::class.java)
+    }
+
     fun getAllBySubjectAndId(subject: String, id: Int) : List<ObjectRecord<String, RecordEvent>>? {
-        val records = helper.fetchRecords(subject+"_"+id.toString(), RecordEvent::class.java)
+        val streamKey = subject.uppercase() + "_" + id.toString()
+        val records = helper.fetchRecords(streamKey, RecordEvent::class.java)
 //        val recordEvents = records?.map {
 //            it.value
 //        }
         return records
     }
-//
-//    fun deleteById(subject: String, id: Int) : Boolean {
-//        return kotlin.runCatching { template.opsForHash<Any, Product>().delete(subject, id.toString()) }.fold(
-//            onFailure = { false },
-//            onSuccess = { true }
-//        )
-//    }
 
-    fun getRangeRecords(streamKey: String, range: Range<String>) : List<ObjectRecord<String, RecordEvent>>? {
+    fun getRangeRecords(subject: String, id: Int, from: String?, to: String?) : List<ObjectRecord<String, RecordEvent>>? {
+        val streamKey = subject.uppercase() + "_" + id.toString()
+        val range = Range.closed(from ?: "-", to ?: "+")
         return helper.fetchRangeRecords(
             RecordEvent::class.java,
             streamKey,

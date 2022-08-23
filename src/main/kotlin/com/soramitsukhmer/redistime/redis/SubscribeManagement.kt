@@ -30,21 +30,10 @@ class SubscribeManagement(
     ): Subscription {
         createGroup(event.streamKey, groupName)
         val streamListener = StreamSubscriber(event.classType, consumer)
-        val options: StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, T>> =
-            StreamMessageListenerContainer.StreamMessageListenerContainerOptions
-                .builder()
-                .pollTimeout(Duration.ofSeconds(1))
-                .keySerializer<String, ObjectRecord<String, T>>(StringRedisSerializer())
-//                .hashKeySerializer<String, T>(StringRedisSerializer())
-//                .hashValueSerializer<String, String>(StringRedisSerializer())
-                .hashKeySerializer<Any, T>(JdkSerializationRedisSerializer())
-                .hashValueSerializer<String, Any>(JdkSerializationRedisSerializer())
-                .objectMapper(ObjectHashMapper())
-                .targetType(event.classType)
-                .build()
+        val options = streamOptions(event.classType)
         val listenerContainer = StreamMessageListenerContainer
             .create(connectionFactory, options)
-        val subscription: Subscription = listenerContainer.receive(
+        val subscription: Subscription = listenerContainer.receiveAutoAck(
             Consumer.from(
                 groupName, InetAddress.getLocalHost().hostName
             ),
@@ -56,7 +45,21 @@ class SubscribeManagement(
         return subscription
     }
 
-    fun createGroup(streamKey: String, groupName: String) {
+    private fun <T> streamOptions(clazz: Class<T>): StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, T>> {
+        return StreamMessageListenerContainer.StreamMessageListenerContainerOptions
+            .builder()
+            .pollTimeout(Duration.ofSeconds(1))
+            .keySerializer<String, ObjectRecord<String, T>>(StringRedisSerializer())
+//                .hashKeySerializer<String, T>(StringRedisSerializer())
+//                .hashValueSerializer<String, String>(StringRedisSerializer())
+            .hashKeySerializer<Any, T>(JdkSerializationRedisSerializer())
+            .hashValueSerializer<String, Any>(JdkSerializationRedisSerializer())
+            .objectMapper(ObjectHashMapper())
+            .targetType(clazz)
+            .build()
+    }
+
+    private fun createGroup(streamKey: String, groupName: String) {
         try {
             redisTemplate.opsForStream<Any, Any>().createGroup(streamKey, groupName)
         } catch (e: Exception) {
