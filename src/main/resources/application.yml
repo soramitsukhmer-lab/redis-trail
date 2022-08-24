@@ -8,3 +8,8 @@ spring:
 server:
   error:
     include-message: always
+
+application:
+  redis-config:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}

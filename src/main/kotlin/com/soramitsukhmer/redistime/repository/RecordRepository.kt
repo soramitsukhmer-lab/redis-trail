@@ -12,7 +12,7 @@ class RecordRepository(
 ) {
 
     fun saveAndDeleteMetaRecord(message: RecordEvent, metaStreamKey: String, time: String) : RecordEvent {
-        message.createdAt  = System.currentTimeMillis()         // TODO() should removed to keep createdAt time from client and redis consistent
+        message.createdAt  = System.currentTimeMillis() // TODO() should removed to keep createdAt time from client and redis consistent
         val streamKey = message.subject.uppercase() + "_" + message.subjectId.toString()
         helper.generateAndSaveRecord(streamKey, message.createdAt.toString(), message)
         helper.deleteEventFromMetaRecord(metaStreamKey, time, message)
@@ -25,11 +25,7 @@ class RecordRepository(
 
     fun getAllBySubjectAndId(subject: String, id: Int) : List<ObjectRecord<String, RecordEvent>>? {
         val streamKey = subject.uppercase() + "_" + id.toString()
-        val records = helper.fetchRecords(streamKey, RecordEvent::class.java)
-//        val recordEvents = records?.map {
-//            it.value
-//        }
-        return records
+        return helper.fetchRecords(streamKey, RecordEvent::class.java)
     }
 
     fun getRangeRecords(subject: String, id: Int, from: String?, to: String?) : List<ObjectRecord<String, RecordEvent>>? {
