@@ -14,19 +14,9 @@ import org.springframework.stereotype.Service
 @Service
 class RedisMessagePublisher(
     private val template: RedisTemplate<String, Any>,
-    private val chTopic: ChannelTopic,
     private val subscribeManagement: SubscribeManagement,
     private val recordRepository: RecordRepository
 ): ITemplatePublisher {
-
-    /** NOTE:
-     *  As the current application current scope,
-     *  I think we don't need to publish anything.
-     *  We only need just to subscribe from client
-     */
-    override fun publish(message: Any) {
-        template.convertAndSend(chTopic.topic, message)
-    }
 
     override fun publishStream(message: StreamEvent) {
         subscribeIfNotExistConsumer(message.streamKey(), message.groupName())
