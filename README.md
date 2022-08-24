@@ -38,6 +38,10 @@ To simply put, we can query the change history of any product via subject and it
 ### Internal Process Flow
 ***Process Flow via REST from Client Application***
 ![Process Flow REST](./assets/Internal-Process-Rest.png)
+<br>
+<br>
+***Process Flow via Stream from Client Application***
+![Process Flow STREAM](./assets/Internal-Process-Stream.png)
 
 ### Record Schema
 We will take product as example in the demo, below is the schema of the Product's Record of the application:
