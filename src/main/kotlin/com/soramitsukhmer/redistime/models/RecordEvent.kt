@@ -1,6 +1,8 @@
 package com.soramitsukhmer.redistime.models
 
 import com.soramitsukhmer.redistime.models.common.EventConfig
+import com.soramitsukhmer.redistime.models.common.RECORD_GROUP
+import com.soramitsukhmer.redistime.models.common.RECORD_STREAM_KEY
 import com.soramitsukhmer.redistime.models.common.StreamEvent
 
 data class RecordEvent(
@@ -22,11 +24,11 @@ data class RecordEvent(
         require(createdAt > 0) {"createdAt timestamp is required"}
     }
 
-    override fun streamKey(): String = "RECORD_EVENT"
+    override fun streamKey(): String = RECORD_STREAM_KEY
 
-    override fun groupName(): String = "RECORD_GROUP"
+    override fun groupName(): String = RECORD_GROUP
 
     companion object {
-        val RECORD_EVENT = EventConfig("RECORD_EVENT", "RECORD_GROUP", RecordEvent::class.java)
+        val RECORD_EVENT = EventConfig(RECORD_STREAM_KEY, RECORD_GROUP, RecordEvent::class.java)
     }
 }
