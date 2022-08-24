@@ -41,7 +41,7 @@ class SubscribeManagement(
             streamListener
         )
         listenerContainer.start()
-        logger.info("Initialized subscription of StreamKey[${event.streamKey}] and Group[$groupName]")
+        logger.info("Subscribed event of StreamKey[${event.streamKey}] and Group[$groupName]")
         return subscription
     }
 
