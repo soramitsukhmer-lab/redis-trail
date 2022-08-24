@@ -5,11 +5,7 @@ import com.soramitsukhmer.redistime.repository.RecordRepository
 import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.web.bind.annotation.*
 
-/** NOTE:
- *  This portal is only for testing purpose.
- *  We will remove it after testing pub/sub is done.
- */
-
+// NOTE: This portal is only for testing and demo purpose.
 @RestController
 @RequestMapping("/api/v1/records")
 class RecordPortal(

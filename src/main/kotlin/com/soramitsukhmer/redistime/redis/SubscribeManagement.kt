@@ -50,8 +50,6 @@ class SubscribeManagement(
             .builder()
             .pollTimeout(Duration.ofSeconds(1))
             .keySerializer<String, ObjectRecord<String, T>>(StringRedisSerializer())
-//                .hashKeySerializer<String, T>(StringRedisSerializer())
-//                .hashValueSerializer<String, String>(StringRedisSerializer())
             .hashKeySerializer<Any, T>(JdkSerializationRedisSerializer())
             .hashValueSerializer<String, Any>(JdkSerializationRedisSerializer())
             .objectMapper(ObjectHashMapper())

@@ -4,12 +4,13 @@ import com.soramitsukhmer.redistime.models.common.EventConfig
 import com.soramitsukhmer.redistime.models.common.StreamEvent
 
 data class RecordEvent(
-    val subject: String,
+    var subject: String,
     val subjectId: Long,
-    val data: Map<String, Any>,
     val action: String,
+    val data: Map<String, Any>,
     val createdBy: Long,
     var createdAt: Long,
+
     override val publishTimestamp: String = System.currentTimeMillis().toString()
 ): StreamEvent {
 
@@ -20,6 +21,8 @@ data class RecordEvent(
         require(action.isNotBlank())
         require(data.keys.isNotEmpty()) {"data keys are required"}
         require(createdAt > 0) {"createdAt timestamp is required"}
+
+        subject = subject.uppercase()
     }
 
     override fun streamKey(): String = "RECORD_EVENT"

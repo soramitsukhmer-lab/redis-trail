@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+// NOTE: This portal is only for testing and demo purpose.
 @RestController
 @RequestMapping("/api/v1/publish")
 class PublisherPortal(
