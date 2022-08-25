@@ -146,11 +146,25 @@ Redis is mainly used as the streaming data for the record event store from clien
 
 ### How the data is stored:
 
-Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-stored) for a more detailed example of what you need for this section.
+All the record change events, they are stored in redis stream. 
+<br>
+When Redis Trails application started up, it will create stream with key ***RECORD_EVENT*** with group ***RECORD_GROUP***.
+When the client application send REST request to Redis Trails to publish the record change event to redis stream or client application publish directly to redis stream, data is stored like: `XADD {stream_key} {timestamp}-0 {record_event_data}`
+* For Example: `XADD RECORD_EVENT 1661400135369-0 {RECORD_EVENT_DATA}`
+<p>
+</p>
+
+Redis Trails is the subscriber of the stream with key ***RECORD_EVENT***, when it receives the event from Redis Stream, Redis Trails will publish another new stream for the record change event which has key that is the combination of ***subject*** and ***subjectId*** of ***RECORD_EVENT_DATA***. Data is stored like: ```XADD {subject}_{subjectId} {timestamp}-0 {data_of_subject}```
+* For Example: `XADD PROUDCT_1 1661400135369-0 {data_of_subject}`
+
 
 ### How the data is accessed:
 
-Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-accessed) for a more detailed example of what you need for this section.
+The client application can filter range of the record event change directly to redis stream or send REST API requests to Redis Trails in order filter record event change history.
+- To fetch all record event change history `XRANGE {stream_key} - +`
+  - For Example: `XRANGE PRODUCT_1 - +`
+- to filter specific timestamp range of the record event change `XRANGE {sream_key} {from_timestamp} {to_timestamp}`
+  - For Example: `XRANGE PRODUCT_1 1661400135369 1661400135569`
 
 
 ## How to run it locally?
