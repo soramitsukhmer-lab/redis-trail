@@ -1,6 +1,6 @@
-# RedisTrail
+# Redis Trail
 
- An effective audit trail solution can be crucial to an organization's security and data integrity as it can help find the who, what, and when. This helps organizations keep track of changes and investigate potential mistakes or violations of policy. RedisTrail is built as an audit trail library using Redis Stack to allow any application to easily integrate for monitoring their data throughout their lifecycle, which is interfaced as ***Redis Stream***. It provides storage for the time-series data so that it can be queried easily and effectively through time.
+ An effective audit trail solution can be crucial to an organization's security and data integrity as it can help find the who, what, and when. This helps organizations keep track of changes and investigate potential mistakes or violations of policy. Redis Trail is built as an audit trail library using Redis Stack to allow any application to easily integrate for monitoring their data throughout their lifecycle, which is interfaced as ***Redis Stream***. It provides storage for the time-series data so that it can be queried easily and effectively through time.
 <br>
 
 ***1. Publish New Product Record to Stream***
@@ -11,6 +11,9 @@
 
 ***3. Filter Product Record History By Timestamp***
 ![Filter Product Record](./assets/FIlter-Product-Record.png)
+
+***4. Fetch All Product's Change History***
+![Fetch All Product Records](./assets/All-Product-Record.png)
 
 # Overview video (Optional)
 
@@ -27,35 +30,30 @@ Here's a short video that explains the project and how it uses Redis:
 
 ## How it works
 
-To illustrate how Redis Trails works, we have built it using Spring Boot framework which allow it get request as REST from any client application that wants to integrate. The showcase of application is mainly for product inventory, where we can create new product and update. And, our Redis Trails will record all the product update's history. So,  all the changes made on to the product will be stored in the Redis Trail via ***Redis Stream***, in which the client application is a publisher to redis stream or send REST request to Redis Trails, and the RedisTrail is the subscriber of redis stream or the rest request receiver from client application. The data is stored with a date time stamp, which indicates when the change was made.
+To illustrate how Redis Trail works, we have built it using Spring Boot framework which allow it get request as REST from any client application that wants to integrate. The showcase of application is mainly for product inventory, where we can create new product and update. And, our Redis Trail will record all the product update's history. So,  all the changes made on to the product will be stored in the Redis Trail via ***Redis Stream***, in which the client applications send REST request to Redis Trail, and the Redis Trail is the REST request receiver from client application. The data is stored with a date time stamp, which indicates when the change was made.
 <br>
 <br>
 To simply put, we can query the change history of any product via subject and its subject id. The filter parameter will be ***from(timestamp)*** and ***to(timestamp)***, ***Redis Trail*** will fetch the products' record filter by timestamp range from and to.
 
 ### Architecture
-![Redis Trails Architecture](./assets/Architecture.png)
+![Redis Trail Architecture](./assets/Architecture.png)
 
 ### Internal Process Flow
-***Process Flow via REST from Client Application***
-![Process Flow REST](./assets/Internal-Process-Rest.png)
-<br>
-<br>
-***Process Flow via Stream from Client Application***
-![Process Flow STREAM](./assets/Internal-Process-Stream.png)
+![Process Flow REST](./assets/Internal-Process-Flow.png)
 
 ### Record Schema
 We will take product as example in the demo, below is the schema of the Product's Record of the application:
 ```kotlin
 data class RecordEvent(
     var subject: String, // We will put "PRODUCT" as the example subject of record to audit
-    val subjectId: Long, // Subject ID is the product's id in the client application that was called to Redis Trails to save.
+    val subjectId: Long, // Subject ID is the product's id in the client application that was called to Redis Trail to save.
     val action: String, // This can be defined by client application. We'd prefer "CREATE" or "UPDATE" as the action value.
     val data: Map<String, Any>, // The data of product
     val createdBy: Long, // The client application's user that makes change to the product record
-    var createdAt: Long // The client application's timestamp that tell Redis Trails when that product data was made change.
+    var createdAt: Long // The client application's timestamp that tell Redis Trail when that product data was made change.
 )
 ```
-Whenever a user makes any changes to the product data such as price, quantity, name, ..., etc. Client application will need to send request to Redis Trails via REST API or publish directly to redis stream.
+Whenever a user makes any changes to the product data such as price, quantity, name, ..., etc. Client application will need to send request to Redis Trail via REST API or publish directly to redis stream.
 <br>
 Request Example
 ```json
@@ -73,10 +71,10 @@ Request Example
     "createdAt": 1661325276076
 }
 ```
-Redis Trails is the consumer for stream key ***RECORD_EVENT*** and stream group ***RECORD_GROUP***. After receive data from redis stream, Redis Trails will publish another stream with key that combine by ***subject*** and ***subjectId*** if this is first make change to the subject and its subject id. For example: the new stream is ***PRODUCT_1***
+Redis Trail is the publisher and consumer for stream key ***RECORD_EVENT*** and stream group ***RECORD_GROUP***. After receive data from redis stream, Redis Trail will publish another stream with key that combine by ***subject*** and ***subjectId*** if this is first make change to the subject and its subject id. For example: the new stream is ***PRODUCT_1***
 <br>
 <br>
-So, the client application can fetch all or filter the product record history from Redis Trails via REST API. Redis Trails will filter the data from the new stream, for example ***PRODUCT_1***, and response back to client application.
+So, the client application can fetch all or filter the product record history from Redis Trail via REST API. Redis Trail will filter the data from the new stream, for example ***PRODUCT_1***, and response back to client application.
 <br>
 Response Example:
 ```json
@@ -142,59 +140,54 @@ The demo data is prepared using two operations: Create and Update.
 }
 ```
 
-Redis is mainly used as the streaming data for the record event store from client application to Redis Trails.
+Redis is mainly used as the streaming data for the record event store from client application to Redis Trail.
 
 ### How the data is stored:
 
 All the record change events, they are stored in redis stream. 
 <br>
-When Redis Trails application started up, it will create stream with key ***RECORD_EVENT*** with group ***RECORD_GROUP***.
-When the client application send REST request to Redis Trails to publish the record change event to redis stream or client application publish directly to redis stream, data is stored like: `XADD {stream_key} {timestamp}-0 {record_event_data}`
+When Redis Trail application started up, it will create stream with key ***RECORD_EVENT*** with group ***RECORD_GROUP***.
+When the client application send REST request to Redis Trail to publish the record change event to redis stream, then data is stored like: `XADD {stream_key} {timestamp}-0 {record_event_data}`
 * For Example: `XADD RECORD_EVENT 1661400135369-0 {RECORD_EVENT_DATA}`
 <p>
 </p>
 
-Redis Trails is the subscriber of the stream with key ***RECORD_EVENT***, when it receives the event from Redis Stream, Redis Trails will publish another new stream for the record change event which has key that is the combination of ***subject*** and ***subjectId*** of ***RECORD_EVENT_DATA***. Data is stored like: ```XADD {subject}_{subjectId} {timestamp}-0 {data_of_subject}```
-* For Example: `XADD PROUDCT_1 1661400135369-0 {data_of_subject}`
+Redis Trail is the subscriber of the stream with key ***RECORD_EVENT***, when it receives the event from Redis Stream, Redis Trail will publish another new stream for the record change event which has key that is the combination of ***subject*** and ***subjectId*** of ***RECORD_EVENT_DATA***. Data is stored like: ```XADD {subject}_{subjectId} MAXLEN 100 {timestamp}-0 {data_of_subject}```
+* For Example: `XADD PROUDCT_1 MAXLEN 100 1661400135369-0 {data_of_subject}`
+  </br>
 
-
+***Notice:*** `MAXLEN 100` indicate that every subject of id, Redis Trail can only store latest 100 change history records. 
 ### How the data is accessed:
 
-The client application can filter range of the record event change directly to redis stream or send REST API requests to Redis Trails in order filter record event change history.
+The client application can send REST API requests to Redis Trail in order filter record event change history.
 - To fetch all record event change history `XRANGE {stream_key} - +`
   - For Example: `XRANGE PRODUCT_1 - +`
 - to filter specific timestamp range of the record event change `XRANGE {sream_key} {from_timestamp} {to_timestamp}`
   - For Example: `XRANGE PRODUCT_1 1661400135369 1661400135569`
-
-
+  
 ## How to run it locally?
-
-[Make sure you test this with a fresh clone of your repo, these instructions will be used to judge your app.]
 
 ### Prerequisites
 
-[Fill out with any prerequisites (e.g. Node, Docker, etc.). Specify minimum versions]
+- Postman - v9.*
+- JAVA - v11
+- Docker - v19.03.13
 
 ### Local installation
+Clone Redis Trail repository and go to `./redis-trails` folder(`cd ./redis-trails`) and then:
+```shell
+# Run Redis Stack in Local
+docker-compose up -d
 
-[Insert instructions for local installation]
+# Run Redis Trail
+./gradlew bootRun
+```
 
-## Deployment
+### Test Redis-Trail
+Open Postman and Import `Redis Trail Collection.json`.
+1. Create Subject Change Record: `POST - http://localhost:8080/api/v1/publish/stream`
+2. Fetch Subject Change Record: `GET - http://localhost:8080/api/v1/records/{subject}/{subject_id}`
 
-To make deploys work, you need to create free account on [Redis Cloud](https://redis.info/try-free-dev-to)
 
-### Google Cloud Run
-
-[Insert Run on Google button](https://cloud.google.com/blog/products/serverless/introducing-cloud-run-button-click-to-deploy-your-git-repos-to-google-cloud)
-
-### Heroku
-
-[Insert Deploy on Heroku button](https://devcenter.heroku.com/articles/heroku-button)
-
-### Netlify
-
-[Insert Deploy on Netlify button](https://www.netlify.com/blog/2016/11/29/introducing-the-deploy-to-netlify-button/)
-
-### Vercel
-
-[Insert Deploy on Vercel button](https://vercel.com/docs/deploy-button)
+## Future of Redis Trail 
+For future reference of Redis Trail, we will make it as Java library which client application can import and config to use in their business needs.
