@@ -190,4 +190,9 @@ Open Postman and Import `Redis Trail Collection.json`.
 
 
 ## Future of Redis Trail 
-For future reference of Redis Trail, we will make it as Java library which client application can import and config to use in their business needs.
+For future reference of Redis Trail, we will make it as Java library which client application can import and config to use in their business requirements. However, keep in mind that even if the Redis Trail in Java library, it still needs store/access data in Redis Stream.
+<br>
+<br>
+The client applications don't have to send request to Redis Trail to save all change records. Using Redis Trail Java library, it can publish and consume data from Redis Stream directly.
+
+***EOF!***
