@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "5c5369c7-7345-4a7c-af52-14d101703f9b",
+		"name": "Redis Trail Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5220420"
+	},
+	"item": [
+		{
+			"name": "Publish New Product Record To Stream",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"subject\": \"ADDRESS\",\n    \"subjectId\": 1,\n    \"action\": \"CREATE\",\n    \"data\": {\n        \"name\": \"Phnom Penh\",\n        \"lat\": \"11.5564\",\n        \"lng\": \"104.9282\"\n    },\n    \"createdBy\": 1,\n    \"createdAt\": 1661759003215\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/publish/stream",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"publish",
+						"stream"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Edit Product Record To Stream V2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"subject\": \"PRODUCT\",\n    \"subjectId\": 1,\n    \"action\": \"UPDATE\",\n    \"data\": {\n        \"name\": \"Teddy Bear\",\n        \"qty\": 100,\n        \"price\": 22.00,\n        \"size\": \"small\"\n    },\n    \"createdBy\": 1,\n    \"createdAt\": 1661759038732\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/publish/stream",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"publish",
+						"stream"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Edit Product Record To Stream V3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"subject\": \"PRODUCT\",\n    \"subjectId\": 1,\n    \"action\": \"UPDATE\",\n    \"data\": {\n        \"name\": \"Teddy Bear\",\n        \"qty\": 101,\n        \"price\": 22.00,\n        \"size\": \"small\"\n    },\n    \"createdBy\": 3,\n    \"createdAt\": 1661759110411\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/publish/stream",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"publish",
+						"stream"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Review All Product Records",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/records/product/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"records",
+						"product",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Product's Record Range",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/records/range/product/1?from=1661761559897&to=1661761631932",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"records",
+						"range",
+						"product",
+						"1"
+					],
+					"query": [
+						{
+							"key": "from",
+							"value": "1661761559897"
+						},
+						{
+							"key": "to",
+							"value": "1661761631932"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
