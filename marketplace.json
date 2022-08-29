@@ -12,7 +12,7 @@
     "deploy_buttons": [],
     "language": ["Kotlin"], 
     "redis_commands": ["XADD","XRANGE"],
-    "redis_features": ["streams"],
+    "redis_features": ["Streams"],
     "redis_modules": ["Streams"],
     "app_image_urls": [], 
     "youtube_url": "",
