@@ -15,7 +15,7 @@
 ***4. Fetch All Product's Change History***
 ![Fetch All Product Records](./assets/All-Product-Record.png)
 
-# Overview video (Optional)
+# Overview video
 
 Here's a short video that explains the project and how it uses Redis:
 
