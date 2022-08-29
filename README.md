@@ -19,9 +19,7 @@
 
 Here's a short video that explains the project and how it uses Redis:
 
-[Insert your own video here, and remove the one below]
-
-[![Embed your YouTube video](https://i.ytimg.com/vi/vyxdC1qK4NE/maxresdefault.jpg)](https://www.youtube.com/watch?v=vyxdC1qK4NE)
+[![Embed your YouTube video](./assets/Sora.png)](https://youtu.be/q-ouExtPMpQ)
 
 ## Technical Stack
 
