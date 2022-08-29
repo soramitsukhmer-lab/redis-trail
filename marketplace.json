@@ -5,8 +5,8 @@
     "rank": 21,
     "type": "Building Block",
     "contributed_by": "Community",
-    "repo_url": "https://github.com/soramitsukhmer-lab/redis-trails", 
-    "download_url": "https://github.com/soramitsukhmer-lab/redis-trails/archive/refs/heads/main.zip",
+    "repo_url": "https://github.com/soramitsukhmer-lab/redis-trail",
+    "download_url": "https://github.com/soramitsukhmer-lab/redis-trail/archive/refs/heads/main.zip",
     "hosted_url": "", 
     "quick_deploy": "false", 
     "deploy_buttons": [],
@@ -15,8 +15,8 @@
     "redis_features": ["Streams"],
     "redis_modules": ["Streams"],
     "app_image_urls": [], 
-    "youtube_url": "",
+    "youtube_url": "https://youtu.be/q-ouExtPMpQ",
     "special_tags": ["Hackathon", "Redis Streams", "RESTful API"], 
     "verticals": ["Financial", "Technology"],
-    "markdown": "https://github.com/soramitsukhmer-lab/redis-trails/blob/main/README.md" 
+    "markdown": "https://github.com/soramitsukhmer-lab/redis-trail/blob/main/README.md"
 }
