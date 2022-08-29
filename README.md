@@ -1,6 +1,6 @@
 # Redis Trail
 
- An effective audit trail solution can be crucial to an organization's security and data integrity as it can help find the who, what, and when. This helps organizations keep track of changes and investigate potential mistakes or violations of policy. Redis Trail is built as an audit trail library using Redis Stack to allow any application to easily integrate for monitoring their data throughout their lifecycle, which is interfaced as ***Redis Stream***. It provides storage for the time-series data so that it can be queried easily and effectively through time.
+ An effective audit trail solution can be crucial to an organization's security and data integrity as it can help find the who, what, and when. This helps organizations keep track of changes and investigate potential mistakes or violations of policy. Redis Trail is built as an audit trail application using Spring Boot framework for the backend and Redis as stream storage. And, the client application can integrate with Redis Trail using RESTful API to keep and monitor track of change.
 <br>
 
 ***1. Publish New Product Record to Stream***
@@ -30,10 +30,10 @@ Here's a short video that explains the project and how it uses Redis:
 
 ## How it works
 
-To illustrate how Redis Trail works, we have built it using Spring Boot framework which allow it get request as REST from any client application that wants to integrate. The showcase of application is mainly for product inventory, where we can create new product and update. And, our Redis Trail will record all the product update's history. So,  all the changes made on to the product will be stored in the Redis Trail via ***Redis Stream***, in which the client applications send REST request to Redis Trail, and the Redis Trail is the REST request receiver from client application. The data is stored with a date time stamp, which indicates when the change was made.
-<br>
-<br>
-To simply put, we can query the change history of any product via subject and its subject id. The filter parameter will be ***from(timestamp)*** and ***to(timestamp)***, ***Redis Trail*** will fetch the products' record filter by timestamp range from and to.
+To illustrate how Redis Trail works, we have built a simple client application that makes use of the APIs provided by Redis Trail. The application allows the user to create or update a product record, when the product is created or updated, the information is sent to Redis Trail by calling API provided by Redis trail. The change record is stored in the Redis as a stream with a date time stamp, and it can be accessed by the user through API provided by Redis Trail to monitor the changes of a specific ID of the product during a certain timestamp as required. 
+
+Redis Trail creates a stream per product ID to persist the changes of each ID independently and thus makes it possible to identify exactly which user has done what changes on a specific product at a specified timestamp easily. Please refer to the Process Flow diagram for more details. 
+
 
 ### Architecture
 ![Redis Trail Architecture](./assets/Architecture.png)
@@ -42,7 +42,7 @@ To simply put, we can query the change history of any product via subject and it
 ![Process Flow REST](./assets/Internal-Process-Flow.png)
 
 ### Record Schema
-We will take product as example in the demo, below is the schema of the Product's Record of the application:
+Below is the schema of the Product's Record of the client application. **Note:** the subject must follow the below convention, where it tells what is the subject, ID of the subject, action, author, and the metadata of the change so that we can tell what exactly is happening to our subject. And, the subject in the demo refers to **Product**.
 ```kotlin
 data class RecordEvent(
     var subject: String, // We will put "PRODUCT" as the example subject of record to audit
@@ -53,9 +53,10 @@ data class RecordEvent(
     var createdAt: Long // The client application's timestamp that tell Redis Trail when that product data was made change.
 )
 ```
-Whenever a user makes any changes to the product data such as price, quantity, name, ..., etc. Client application will need to send request to Redis Trail via REST API or publish directly to redis stream.
+Whenever a user makes any changes to the product data such as price, quantity, name, ..., etc. The client application calls POST API provided by Redis Trail to keep records of change:
 <br>
-Request Example
+<br>
+**Request Example**
 ```json
 {
     "subject": "PRODUCT",
@@ -71,12 +72,10 @@ Request Example
     "createdAt": 1661325276076
 }
 ```
-Redis Trail is the publisher and consumer for stream key ***RECORD_EVENT*** and stream group ***RECORD_GROUP***. After receive data from redis stream, Redis Trail will publish another stream with key that combine by ***subject*** and ***subjectId*** if this is first make change to the subject and its subject id. For example: the new stream is ***PRODUCT_1***
+After receiving the request from the client application, Redis Trail converts the JSON request body to a stream in the Redis (key: **RECORD_EVENT**, group: **RECORD_GROUP**). And, Redis Trail itself is a subscriber of **RECORD_EVENT** and of the group  **RECORD_GROUP**. And thus, once the stream is created, the Redis Trail receives the event, and creates a new stream with a key that combines between subject and its ID in Redis, making it possible to retrieve all logs by its "subject_id" (e.g. PRODUCT_1) in a later stage via GET API :
 <br>
 <br>
-So, the client application can fetch all or filter the product record history from Redis Trail via REST API. Redis Trail will filter the data from the new stream, for example ***PRODUCT_1***, and response back to client application.
-<br>
-Response Example:
+**Response Example:**
 ```json
 {
         "stream": "PRODUCT_1",
@@ -140,29 +139,30 @@ The demo data is prepared using two operations: Create and Update.
 }
 ```
 
-Redis is mainly used as the streaming data for the record event store from client application to Redis Trail.
-
+Redis is mainly used as the streaming data for the record event store from the client application to Redis Trail.
+<br>
 ### How the data is stored:
 
-All the record change events, they are stored in redis stream. 
+All the record changes are stored in Redis as stream. 
 <br>
-When Redis Trail application started up, it will create stream with key ***RECORD_EVENT*** with group ***RECORD_GROUP***.
-When the client application send REST request to Redis Trail to publish the record change event to redis stream, then data is stored like: `XADD {stream_key} {timestamp}-0 {record_event_data}`
+<br>
+When Redis Trail application starts up successfully, it creates a stream with key ***RECORD_EVENT*** with group ***RECORD_GROUP***.
+When the client application sends POST request to Redis Trail, the RedisTrail app creates a stream in the Redis: `XADD {stream_key} {timestamp}-0 {record_event_data}`
 * For Example: `XADD RECORD_EVENT 1661400135369-0 {RECORD_EVENT_DATA}`
 <p>
 </p>
 
-Redis Trail is the subscriber of the stream with key ***RECORD_EVENT***, when it receives the event from Redis Stream, Redis Trail will publish another new stream for the record change event which has key that is the combination of ***subject*** and ***subjectId*** of ***RECORD_EVENT_DATA***. Data is stored like: ```XADD {subject}_{subjectId} MAXLEN 100 {timestamp}-0 {data_of_subject}```
+Redis Trail itself is a subscriber of **RECORD_EVENT** and of the group  **RECORD_GROUP**. And thus, once the above stream is created, the Redis Trail receives the event, and creates a new stream with a key that combines between subject and its ID in Redis, making it possible to retrieve all logs by its "subject_id" (e.g. PRODUCT_1): ```XADD {subject}_{subjectId} MAXLEN 100 {timestamp}-0 {data_of_subject}```
 * For Example: `XADD PROUDCT_1 MAXLEN 100 1661400135369-0 {data_of_subject}`
   </br>
 
-***Notice:*** `MAXLEN 100` indicate that every subject of id, Redis Trail can only store latest 100 change history records. 
+***Notice:*** `MAXLEN 100` indicates that we can store the latest 100 change history records of one id per subject (e.g. PRODUCT_1), and the old data of that subject will be removed once the change history record reaches `MAXLEN`. The `MAXLEN` configuration can be configured dynamically in future enhancement, and the old data could be stored in a NOSQL database as a backup. This is an effective way to reduce the size and saves the cost of Redis storage.
 ### How the data is accessed:
 
-The client application can send REST API requests to Redis Trail in order filter record event change history.
+The client application can send REST API requests to Redis Trail in order to retrieve the change history records of a specific product in a specific timestamp, and Redis Trail fetches the data from the Redis and responses back to the client:
 - To fetch all record event change history `XRANGE {stream_key} - +`
   - For Example: `XRANGE PRODUCT_1 - +`
-- to filter specific timestamp range of the record event change `XRANGE {sream_key} {from_timestamp} {to_timestamp}`
+- To filter for a specific timestamp range `XRANGE {sream_key} {from_timestamp} {to_timestamp}`
   - For Example: `XRANGE PRODUCT_1 1661400135369 1661400135569`
   
 ## How to run it locally?
@@ -190,9 +190,8 @@ Open Postman and Import `Redis Trail Collection.json`.
 
 
 ## Future of Redis Trail 
-For future reference of Redis Trail, we will make it as Java library which client application can import and config to use in their business requirements. However, keep in mind that even if the Redis Trail in Java library, it still needs store/access data in Redis Stream.
+For future enhancement of Redis Trail, we are planning to make the backend a Java library, so that it can be easily integrated with the client application. 
 <br>
 <br>
-The client applications don't have to send request to Redis Trail to save all change records. Using Redis Trail Java library, it can publish and consume data from Redis Stream directly.
-
+We are also planning to build another communication layer for the client application to talk to Redis in the Redis Trail via Redis Pub/Sub directly.
 ***EOF!***
