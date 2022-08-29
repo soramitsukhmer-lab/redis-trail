@@ -1,0 +1,22 @@
+{
+    "app_name": "Redis Trail", 
+    "description": "Implement audit trail using Redis Stream and Spring Boot",
+    "hidden": true, 
+    "rank": 21,
+    "type": "Building Block",
+    "contributed_by": "Community",
+    "repo_url": "https://github.com/soramitsukhmer-lab/redis-trails", 
+    "download_url": "https://github.com/soramitsukhmer-lab/redis-trails/archive/refs/heads/main.zip",
+    "hosted_url": "", 
+    "quick_deploy": "false", 
+    "deploy_buttons": [],
+    "language": ["Kotlin"], 
+    "redis_commands": ["XADD","XRANGE"],
+    "redis_features": ["streams"],
+    "redis_modules": ["Streams"],
+    "app_image_urls": [], 
+    "youtube_url": "",
+    "special_tags": ["Hackathon", "Redis Streams", "RESTful API"], 
+    "verticals": ["Financial", "Technology"],
+    "markdown": "https://github.com/soramitsukhmer-lab/redis-trails/blob/main/README.md" 
+}
